@@ -1,16 +1,22 @@
 "use strict";
-/* Bio/Chem 記字練習 — Duolingo 式本地 web app（無後台、無上傳） */
-const LS = "biochem_trainer_v1";
+/* Bio/Chem 記字練習 — Duolingo 式本地 web app（無後台、無上傳）
+ * UI adapter：DOM / localStorage / 語音。純邏輯（排隊/熟練度/章節）喺 engine.js */
+const E = (typeof Engine !== "undefined") ? Engine : null;   // engine.js 要先 load
+if (!E) throw new Error("engine.js 未載入 — index.html 要 <script src='engine.js'> 先過 app.js");
 const VOICE_KEY = "biochem_voice";
 const SUBJ_ZH = { Biology: "生物 Biology", Chemistry: "化學 Chemistry" };
 const SUBJ_ID = { Biology: "bio", Chemistry: "chem" };
-const ROUND_LEN = 10;
+/* engine 常數/熟練度 alias（單一來源喺 engine.js） */
+const ROUND_LEN = E.ROUND_LEN;
+const CARD_LEN = E.CARD_LEN;
+const CHAPTER_ORDER = E.CHAPTER_ORDER;
+const master = (s) => E.master(s);
+const seen = (s) => E.seen(s);
 
-let WORDS = [], STATS = {}, tab = "all", mode = "mixed", round = null;
+let WORDS = [], STATS = {}, tab = "all", chapter = null, mode = "mixed", round = null, card = null;
 const $ = (s) => document.querySelector(s);
 
 /* ---------- 資料 ---------- */
-function key(w) { return w.subject + "|" + w.en; }
 function load() {
   return fetch("wordlist.json", { cache: "no-store" })
     .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
@@ -22,34 +28,21 @@ function load() {
 }
 function syncStats() {
   try {
-    const raw = JSON.parse(localStorage.getItem(LS) || "{}");
-    const keys = new Set(WORDS.map((w) => key(w)));
-    STATS = {};
-    for (const [k, v] of Object.entries(raw)) if (keys.has(k) && v && typeof v.ok === "number") STATS[k] = v;
-    for (const w of WORDS) if (!STATS[key(w)]) STATS[key(w)] = { ok: 0, wrong: 0, streak: 0 };
+    STATS = E.normalizeStats(JSON.parse(localStorage.getItem(E.LS) || "{}"), WORDS);
   } catch (e) { STATS = {}; }
 }
-function save() { localStorage.setItem(LS, JSON.stringify(STATS)); }
+function save() { E.saveStats(STATS); }
 
-/* ---------- 熟練度 ---------- */
-const seen = (s) => s.ok + s.wrong > 0;
-const master = (s) => (s.ok >= 5) || (s.ok >= 3 && s.wrong === 0);
-function wordStats(w) { return STATS[key(w)]; }
-function poolOf(subj) {
-  return WORDS.filter((w) => subj === "all" || w.subject === subj);
-}
-function progress(subj) {
-  const p = poolOf(subj);
-  const r = { total: p.length, ok: 0, wip: 0, no: 0, wrong: 0 };
-  for (const w of p) {
-    const s = wordStats(w);
-    if (master(s)) r.ok++;
-    else if (seen(s)) r.wip++;
-    else r.no++;
-    if (s.wrong > 0) r.wrong++;
-  }
-  return r;
-}
+/* ---------- 熟練度（delegate engine；STATS 傳入做 store seam） ---------- */
+function wordStats(w) { return STATS[E.key(w)]; }
+function poolOf(subj) { return E.poolOf(WORDS, subj); }
+function activePool() { return E.activePool(WORDS, tab, chapter); }
+function chapterMeta(name) { return E.chapterMeta(WORDS, STATS, name); }
+function progress(subj) { return E.progress(WORDS, STATS, subj); }
+function tierOf(w) { return E.tierOf(w, STATS); }
+function buildQueue(subj, onlyWrong) { return E.buildQueue(WORDS, STATS, subj, chapter, onlyWrong); }
+function normTerm(s) { return E.normTerm(s); }
+function acceptForms(en) { return E.acceptForms(en); }
 
 /* ---------- 讀音（Web Speech API，iOS 內置語音，零外部依賴） ---------- */
 function voiceAuto() {
@@ -77,50 +70,26 @@ function speak(text) {
 }
 function speakWord(w) { speak(w.en); }
 
-/* ---------- 出題排隊：錯字優先 ---------- */
-/* 分層：
- *  tier 0 = ⭐ 相片重點字（未熟）
- *  tier 1 = 錯過嘅字（非重點）
- *  tier 2 = 未學過
- *  tier 3 = 練習中（未熟）
- *  tier 4 = 已熟
- * 層內：重點次數多 → 錯得多 → 啱得少 → 隨機
- */
-function tierOf(w) {
-  const s = wordStats(w);
-  const p = w.priority || 0;
-  if (p > 0 && !master(s)) return 0;
-  if (s.wrong > 0 && !master(s)) return 1;
-  if (!seen(s)) return 2;
-  if (s.ok > 0) return 3;
-  return 4;
-}
-function buildQueue(subj, onlyWrong) {
-  let p = poolOf(subj);
-  if (onlyWrong) p = p.filter((w) => wordStats(w).wrong > 0);
-  if (!p.length) return [];
-  const q = [...p].sort((a, b) => {
-    const ta = tierOf(a), tb = tierOf(b);
-    if (ta !== tb) return ta - tb;
-    const pa = a.priority || 0, pb = b.priority || 0;
-    if (pa !== pb) return pb - pa;
-    const sa = wordStats(a), sb = wordStats(b);
-    if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
-    if (sa.ok !== sb.ok) return sa.ok - sb.ok;
-    return Math.random() - 0.5;
-  });
-  return q.slice(0, ROUND_LEN);
-}
-
 /* ---------- 渲染 ---------- */
 function render() {
+  if (card) { card.idx < card.queue.length ? renderCard() : renderCardSummary(); return; }
   if (round) { round.idx < round.queue.length ? renderQ() : renderSummary(); return; }
   renderHome();
 }
 function el(html) { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; }
+/* 科目 tab（全部/生物/化學）—— renderHome / showList / showChapterPicker 共用 */
+function tabsHTML(extraStyle) {
+  return `<div class="tabs"${extraStyle ? ` style="${extraStyle}"` : ""}>
+      <button class="tab ${tab === "all" ? "active" : ""}" data-t="all">全部</button>
+      <button class="tab ${tab === "Biology" ? "active" : ""}" data-s="Biology">🧬 生物</button>
+      <button class="tab ${tab === "Chemistry" ? "active" : ""}" data-s="Chemistry">🧪 化學</button>
+    </div>`;
+}
+/* 揀科：轉 tab 一律清除章節 filter（章節淨係 Biology 概念） */
+function pickTab(b) { tab = b.dataset.t || b.dataset.s; chapter = null; }
 
 function renderHome() {
-  const cur = poolOf(tab).filter((w) => wordStats(w).wrong > 0).length;
+  const cur = activePool().filter((w) => wordStats(w).wrong > 0).length;
   const bars = Object.keys(SUBJ_ZH).map((sj) => {
     const p = progress(sj);
     const pct = p.total ? Math.round((p.ok / p.total) * 100) : 0;
@@ -133,14 +102,20 @@ function renderHome() {
   const wrongWords = WORDS.filter((w) => wordStats(w).wrong > 0);
   const sm = WORDS.filter((w) => w.sample).length;
   const pri = poolOf(tab).filter((w) => w.priority).length;
+  const isBio = tab === "Biology";
+  const chapMeta = (isBio && chapter) ? chapterMeta(chapter) : null;
+  const chapRow = isBio ? `
+      <div class="chapbar">
+        ${chapMeta
+          ? `<span class="chapcur">📚 章節：<b>${chapter}</b>（${chapMeta.total} 字 · 已熟 ${chapMeta.ok}）</span>
+           <button class="btn gray sm-btn" id="chapClearBtn">✕ 全部課題</button>`
+          : `<span class="chapcur">📚 全部課題（20 課）</span>`}
+        <button class="btn ${chapter ? "b" : "gray"} sm-btn" id="chapBtn">${chapter ? "換章節" : "揀章節"}</button>
+      </div>` : "";
 
   $("#app").innerHTML = `
     <div class="card">
-      <div class="tabs">
-        <button class="tab ${tab === "all" ? "active" : ""}" data-t="all">全部</button>
-        <button class="tab ${tab === "Biology" ? "active" : ""}" data-s="Biology">🧬 生物</button>
-        <button class="tab ${tab === "Chemistry" ? "active" : ""}" data-s="Chemistry">🧪 化學</button>
-      </div>
+      ${tabsHTML()}
       ${bars}
       <div class="chips">
         <span class="chip ok">✅ 已熟 ${a.ok}</span>
@@ -157,20 +132,30 @@ function renderHome() {
         <button class="mode ${mode === "type" ? "active" : ""}" data-m="type"><span class="t">⌨️ 串字</span><span class="s">睇中文打英文</span></button>
         <button class="mode ${mode === "mixed" ? "active" : ""}" data-m="mixed"><span class="t">🔀 混合</span><span class="s">兩種輪流</span></button>
       </div>
+      ${chapRow}
       <button class="btn g big" id="startBtn">▶️ 開始練習（每組 ${ROUND_LEN} 題）</button>
       <div class="row" style="margin-top:10px">
-        <button class="btn b" id="wrongBtn" ${cur ? "" : "disabled style='opacity:.4'"}">🔁 錯字重溫（${cur}）</button>
+        <button class="btn b" id="cardBtn">📇 溫習卡</button>
+        <button class="btn b" id="wrongBtn" ${cur ? "" : "disabled style='opacity:.4'"}>🔁 錯字重溫（${cur}）</button>
+      </div>
+      <div class="row" style="margin-top:8px">
         <button class="btn gray" id="listBtn">📋 字庫</button>
       </div>
       <button class="btn ${voiceAuto() ? "b" : "gray"} big" id="voiceBtn" style="margin-top:8px">🔊 自動讀音：${voiceAuto() ? "開（每題自動讀）" : "關"}</button>
-      <p class="hint">💡 出題順序：⭐ 相片重點字 → 錯過嘅字 → 其他未學/未熟 → 已熟。揀科撳上面 tab。</p>
+      <p class="hint">💡 順序：📇 溫習卡學字 → ▶️ 練習鞏固 → 錯字自動重溫。生物科可以揀章節集中練。</p>
     </div>`;
 
-  $("#app").querySelectorAll(".tab").forEach((b) => b.onclick = () => { tab = b.dataset.t || b.dataset.s; render(); });
+  $("#app").querySelectorAll(".tab").forEach((b) => b.onclick = () => { pickTab(b); render(); });
   $("#app").querySelectorAll(".mode").forEach((b) => b.onclick = () => { mode = b.dataset.m; render(); });
   $("#startBtn").onclick = () => startRound(false);
+  const cdBtn = $("#cardBtn");
+  if (cdBtn) cdBtn.onclick = startCards;
   $("#wrongBtn").onclick = () => startRound(true);
   $("#listBtn").onclick = showList;
+  const cb = $("#chapBtn");
+  if (cb) cb.onclick = showChapterPicker;
+  const cc = $("#chapClearBtn");
+  if (cc) cc.onclick = () => { chapter = null; render(); };
   const vb = $("#voiceBtn");
   if (vb) vb.onclick = () => { setVoiceAuto(!voiceAuto()); render(); };
 }
@@ -182,12 +167,119 @@ function startRound(onlyWrong) {
   render();
 }
 
+/* ---------- 📇 溫習卡（Flashcards）：先學後練 ---------- */
+function startCards() {
+  const p = activePool().slice().sort((a, b) => {
+    const ta = tierOf(a), tb = tierOf(b);
+    if (ta !== tb) return ta - tb;
+    const pa = a.priority || 0, pb = b.priority || 0;
+    if (pa !== pb) return pb - pa;
+    return Math.random() - 0.5;
+  });
+  const fresh = p.filter((w) => !master(wordStats(w)));
+  const pool = fresh.length ? fresh : p;
+  if (!pool.length) { alert("呢度未有字可以溫～"); return; }
+  card = { queue: pool.slice(0, CARD_LEN), idx: 0, knew: 0, unsure: [] };
+  render();
+}
+function renderCard() {
+  const w = card.queue[card.idx];
+  card.flipped = false;
+  const chapTag = w.chapter ? ` · 📚 ${w.chapter}` : "";
+  const tagTxt = `${card.idx + 1}/${card.queue.length} · ${w.subject === "Biology" ? "🧬 生物" : "🧪 化學"}${chapTag} · 📇 溫習`;
+  const star = w.priority ? "⭐ " : "";
+  const status = master(wordStats(w)) ? "（已熟·複習）" : seen(wordStats(w)) ? "（練習中）" : "（未學）";
+  $("#app").innerHTML = `
+    <div class="card">
+      <div class="qtag"><span>${tagTxt}</span><span>💪 記住 ${card.knew} · 🤔 ${card.unsure.length}</span></div>
+      <div class="flashcard" id="cardFace">
+        <div class="fc-en">${star}${w.en}</div>
+        <div class="fc-zh" id="fcZh">${w.zh} <span class="fc-status">${status}</span></div>
+        <div class="fc-sub">撳張卡睇答案 · 🔊 讀音</div>
+      </div>
+      <div style="text-align:center;margin:2px 0 10px"><button class="spk" id="spkBtn">🔊 讀音</button></div>
+      <div class="feedback" id="fb"></div>
+      <div id="cardAct"></div>
+    </div>`;
+  const face = $("#cardFace");
+  face.onclick = () => {
+    card.flipped = true;
+    face.classList.add("flipped");
+    speakWord(w);
+    renderCardActs(w);
+  };
+  const spk = $("#spkBtn");
+  if (spk) spk.onclick = (e) => { e.stopPropagation(); speakWord(w); };
+  if (voiceAuto()) setTimeout(() => { if ($("#cardFace")) speakWord(w); }, 400);
+  renderCardActs(w);
+}
+function renderCardActs(w) {
+  const act = $("#cardAct");
+  if (!act) return;
+  act.innerHTML = card.flipped
+    ? `<div class="row"><button class="btn g" id="knowBtn">✅ 識</button>
+       <button class="btn b" id="unsureBtn">🔁 唔識（入錯字隊）</button></div>`
+    : `<button class="btn gray big" id="flipHint">👀 睇答案</button>`;
+  const kh = $("#flipHint");
+  if (kh) kh.onclick = () => { card.flipped = true; $("#cardFace").classList.add("flipped"); renderCardActs(w); speakWord(w); };
+  const kb = $("#knowBtn");
+  if (kb) kb.onclick = () => cardAnswer(w, true);
+  const ub = $("#unsureBtn");
+  if (ub) ub.onclick = () => cardAnswer(w, false);
+}
+function cardAnswer(w, knew) {
+  if (card.answered) return;
+  card.answered = true;
+  const s = wordStats(w);
+  if (knew) { card.knew++; s.ok++; s.streak++; }
+  else { card.unsure.push(w); s.wrong++; s.streak = 0; }
+  save();
+  const fb = $("#fb");
+  fb.className = "feedback " + (knew ? "ok" : "bad");
+  fb.innerHTML = knew ? "✅ 記住喇！" : `🔁 記低咗，練習會優先出：<b>${w.en}</b>`;
+  const act = $("#cardAct");
+  if (act) act.innerHTML = `<button class="btn g big" id="nextCardBtn" style="margin-top:10px">${card.idx + 1 < card.queue.length ? "下一張 ➡️" : "睇結果 🏁"}</button>`;
+  const nb = $("#nextCardBtn");
+  if (nb) nb.onclick = () => { card.idx++; card.answered = false; render(); };
+}
+function renderCardSummary() {
+  const tot = card.queue.length;
+  const okN = card.knew;
+  const pct = Math.round((okN / tot) * 100);
+  const wr = card.unsure.map((x) => `<div class="wr"><span>${x.zh}</span><b>${x.en}</b></div>`).join("");  const scope = chapter ? `（📚 ${chapter}）` : "";
+  $("#app").innerHTML = `
+    <div class="card">
+      <div class="bigscore">${pct}%</div>
+      <div class="sumlbl">📇 溫習完：記住 ${okN}/${tot}${scope}</div>
+      ${wr ? `<h3 style="margin-bottom:8px">🔁 唔識嘅字（已入錯字隊，練習會優先出）：</h3>` + wr : `<div style="text-align:center;font-size:20px">🏅 全部記住！</div>`}
+      <div class="row" style="margin-top:14px">
+        <button class="btn g" id="againBtn">🔁 再溫一轉</button>
+        <button class="btn gray" id="homeBtn">🏠 主頁</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn b" id="drillBtn">✍️ 練返今次唔識嘅</button>
+      </div>
+    </div>`;
+  $("#againBtn").onclick = () => { card = null; startCards(); };
+  $("#homeBtn").onclick = () => { card = null; render(); };
+  $("#drillBtn").onclick = () => {
+    const unsureWords = card.unsure;
+    card = null;
+    const q = unsureWords.length ? unsureWords : buildQueue(tab, true);
+    round = { queue: q, idx: 0, score: 0, consec: 0, best: 0, wrongList: [], correctList: [] };
+    render();
+  };
+  $("#headStreak").textContent = "🔥 0";
+  $("#headScore").textContent = "🏆 " + 0;
+}
+
 /* ---------- 一題題目 ---------- */
 function renderQ() {
   const w = round.queue[round.idx];
   round.answered = false;
   const isType = round.modeNow = (mode === "type") || (mode === "mixed" && round.idx % 2 === 1);
-  const tagTxt = `${round.idx + 1}/${round.queue.length} · ${w.subject === "Biology" ? "🧬 生物" : "🧪 化學"} · ${isType ? "⌨️ 串字" : "👀 認字"}`;
+  const chapTag = w.chapter ? ` · 📚 ${w.chapter}` : "";
+  const tagTxt = `${round.idx + 1}/${round.queue.length} · ${w.subject === "Biology" ? "🧬 生物" : "🧪 化學"}${chapTag} · ${isType ? "⌨️ 串字" : "👀 認字"}`;
   $("#app").innerHTML = `
     <div class="card">
       <div class="qtag"><span>${tagTxt}</span><span>🔥 ${round.consec} · 🏆 ${round.score}</span></div>
@@ -276,25 +368,6 @@ function answerMC(w, chosen, btn) {
   });
   afterAnswer(w, ok, w.zh);
 }
-function normTerm(s) {
-  return s.trim().toLowerCase().replace(/[.,;:!?]+$/, "").replace(/\s+/g, " ");
-}
-/* 接受多種寫法：原樣 / 甩括號註釋 / 括號入面嘅別名（Rontgen ray (Roentgen ray) 打邊個都得） */
-function acceptForms(en) {
-  const out = new Set();
-  for (let raw of en.split(/[|/]/)) {
-    raw = raw.trim();
-    if (!raw) continue;
-    out.add(normTerm(raw));
-    const noParen = raw.replace(/\s*\([^()]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
-    if (noParen && noParen !== raw) out.add(normTerm(noParen));
-    for (const m of raw.matchAll(/\(([^()]*)\)/g)) {
-      const inner = m[1].trim();
-      if (inner) out.add(normTerm(inner));
-    }
-  }
-  return [...out];
-}
 function answerType(val, w) {
   if (round.answered) return;
   round.answered = true;
@@ -337,35 +410,74 @@ function renderSummary() {
   $("#headScore").textContent = "🏆 " + round.score;
 }
 
-/* ---------- 字庫一覽 ---------- */
+/* ---------- 字庫一覽（📖 兼做課題字表：每行可聽讀音） ---------- */
 function showList() {
-  const words = poolOf(tab);
+  const words = activePool();
   const SHOW_MAX = 2000;
   const rows = words.slice(0, SHOW_MAX).map((w) => {
     const s = wordStats(w);
     const dot = master(s) ? "ok" : seen(s) ? "wip" : "no";
-    return `<div class="wli"><span><span class="dot ${dot}"></span>${w.priority ? "⭐ " : ""}<span class="zh">${w.zh}</span> ${w.sample ? '<span class="chip sm">試</span>' : ""}</span>
-      <span class="en">${w.en} · 錯${s.wrong}·啱${s.ok}</span></div>`;
+    const chap = w.chapter ? ` <span class="mini">${w.chapter}</span>` : "";
+    return `<div class="wli"><span><span class="dot ${dot}"></span>${w.priority ? "⭐ " : ""}<span class="zh">${w.zh}</span>${chap} ${w.sample ? '<span class="chip sm">試</span>' : ""}</span>
+      <span class="en"><button class="spk mini" data-en="${encodeURIComponent(w.en)}" title="讀音">🔊</button> ${w.en} · 錯${s.wrong}·啱${s.ok}</span></div>`;
   }).join("");
   const moreNote = words.length > SHOW_MAX
-    ? `<p class="note">顯示頭 ${SHOW_MAX} 個（共 ${words.length}）— 撳上方科目 tab 可以收窄</p>` : "";
+    ? `<p class="note">顯示頭 ${SHOW_MAX} 個（共 ${words.length}）— 撳上方科目 tab 或揀章節可以收窄</p>` : "";
+  const scope = chapter ? `（📚 ${chapter}）` : "";
   const d = el(`<div class="modal"><div class="box">
     <button class="close-x" id="closeX">✕</button>
-    <div class="tabs" style="margin-bottom:6px">
-      <button class="tab ${tab === "all" ? "active" : ""}" data-t="all">全部</button>
-      <button class="tab ${tab === "Biology" ? "active" : ""}" data-s="Biology">🧬 生物</button>
-      <button class="tab ${tab === "Chemistry" ? "active" : ""}" data-s="Chemistry">🧪 化學</button>
-    </div>
-    <h3>字庫（${words.length} 字）— 🟢已熟 🟡練習中 ⚪未學</h3>
+    ${tabsHTML("margin-bottom:6px")}
+    <h3>📖 字庫${scope}（${words.length} 字）— 🟢已熟 🟡練習中 ⚪未學 · 🔊撳掣聽讀音</h3>
     ${moreNote}
     ${rows || "<p>未有字</p>"}
     <div class="modal-foot"><button class="btn g big" id="closeList">🏠 返回主頁</button></div>
   </div></div>`);
   const close = () => d.remove();
-  d.querySelectorAll(".tab").forEach((b) => b.onclick = () => { tab = b.dataset.t || b.dataset.s; d.remove(); showList(); });
+  d.querySelectorAll(".tab").forEach((b) => b.onclick = () => { pickTab(b); d.remove(); showList(); });
+  d.querySelectorAll(".spk.mini").forEach((b) => b.onclick = (e) => {
+    e.stopPropagation();
+    speak(decodeURIComponent(b.dataset.en));
+  });
   d.querySelector("#closeList").onclick = close;
   d.querySelector("#closeX").onclick = close;
   d.onclick = (e) => { if (e.target === d) close(); };   // 撳外面黑色位都關
+  document.body.appendChild(d);
+}
+
+/* ---------- 揀章節（Biology 限定） ---------- */
+function showChapterPicker() {
+  const rows = CHAPTER_ORDER.map((name) => {
+    const m = chapterMeta(name);
+    const pct = m.total ? Math.round((m.ok / m.total) * 100) : 0;
+    const active = chapter === name ? "active" : "";
+    return `<button class="chap ${active}" data-c="${encodeURIComponent(name)}">
+      <span class="cn">📚 ${name}</span>
+      <span class="cb"><i style="width:${pct}%"></i></span>
+      <span class="cs">已熟 ${m.ok}/${m.total}</span>
+    </button>`;
+  }).join("");
+  const d = el(`<div class="modal"><div class="box">
+    <button class="close-x" id="closeX">✕</button>
+    <h3>📚 揀章節 — 生物 Biology</h3>
+    <p class="hint" style="margin:-4px 0 10px">揀咗之後只會出嗰課嘅字（⭐ 重點字照樣優先）；再撳一次同一個章節 = 取消。</p>
+    <div class="chapgrid">
+      <button class="chap all ${!chapter ? "active" : ""}" data-c="">
+        <span class="cn">🌐 全部課題</span><span class="cs">已熟 ${progress("Biology").ok}/${poolOf("Biology").length}</span>
+      </button>
+      ${rows}
+    </div>
+    <div class="modal-foot"><button class="btn g big" id="closeList">✅ 搞掂</button></div>
+  </div></div>`);
+  const close = () => d.remove();
+  d.querySelectorAll(".chap").forEach((b) => b.onclick = () => {
+    const c = decodeURIComponent(b.dataset.c);
+    chapter = c || null;
+    d.remove();
+    render();
+  });
+  d.querySelector("#closeList").onclick = close;
+  d.querySelector("#closeX").onclick = close;
+  d.onclick = (e) => { if (e.target === d) close(); };
   document.body.appendChild(d);
 }
 
