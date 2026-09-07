@@ -1,6 +1,7 @@
 "use strict";
 /* Bio/Chem 記字練習 — Duolingo 式本地 web app（無後台、無上傳） */
 const LS = "biochem_trainer_v1";
+const VOICE_KEY = "biochem_voice";
 const SUBJ_ZH = { Biology: "生物 Biology", Chemistry: "化學 Chemistry" };
 const SUBJ_ID = { Biology: "bio", Chemistry: "chem" };
 const ROUND_LEN = 10;
@@ -50,17 +51,64 @@ function progress(subj) {
   return r;
 }
 
+/* ---------- 讀音（Web Speech API，iOS 內置語音，零外部依賴） ---------- */
+function voiceAuto() {
+  try { const v = JSON.parse(localStorage.getItem(VOICE_KEY) || "{}"); return v.auto !== false; } catch (e) { return true; }
+}
+function setVoiceAuto(on) {
+  try { localStorage.setItem(VOICE_KEY, JSON.stringify({ auto: on })); } catch (e) {}
+}
+function pickEnVoice() {
+  if (typeof speechSynthesis === "undefined") return null;
+  const vs = speechSynthesis.getVoices();
+  return vs.find((v) => /^en[-_](US|GB)/i.test(v.lang) && /samantha|google us|aria|female|daniel|karen/i.test(v.name))
+      || vs.find((v) => /^en/i.test(v.lang)) || null;
+}
+function speak(text) {
+  if (typeof speechSynthesis === "undefined") return;
+  const clean = text.replace(/\s*\([^()]*\)/g, " ").replace(/\s+/g, " ").trim();
+  if (!clean) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(clean);
+  const v = pickEnVoice();
+  if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "en-US"; }
+  u.rate = 0.85;
+  speechSynthesis.speak(u);
+}
+function speakWord(w) { speak(w.en); }
+
 /* ---------- 出題排隊：錯字優先 ---------- */
+/* 分層：
+ *  tier 0 = ⭐ 相片重點字（未熟）
+ *  tier 1 = 錯過嘅字（非重點）
+ *  tier 2 = 未學過
+ *  tier 3 = 練習中（未熟）
+ *  tier 4 = 已熟
+ * 層內：重點次數多 → 錯得多 → 啱得少 → 隨機
+ */
+function tierOf(w) {
+  const s = wordStats(w);
+  const p = w.priority || 0;
+  if (p > 0 && !master(s)) return 0;
+  if (s.wrong > 0 && !master(s)) return 1;
+  if (!seen(s)) return 2;
+  if (s.ok > 0) return 3;
+  return 4;
+}
 function buildQueue(subj, onlyWrong) {
   let p = poolOf(subj);
   if (onlyWrong) p = p.filter((w) => wordStats(w).wrong > 0);
   if (!p.length) return [];
-  const score = (w) => {
-    const s = wordStats(w);
-    const wgt = s.wrong * 1000 + (seen(s) ? 0 : 500) - Math.min(s.ok, 20) * 10 + Math.random() * 100;
-    return wgt;
-  };
-  const q = [...p].sort((a, b) => score(b) - score(a));
+  const q = [...p].sort((a, b) => {
+    const ta = tierOf(a), tb = tierOf(b);
+    if (ta !== tb) return ta - tb;
+    const pa = a.priority || 0, pb = b.priority || 0;
+    if (pa !== pb) return pb - pa;
+    const sa = wordStats(a), sb = wordStats(b);
+    if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
+    if (sa.ok !== sb.ok) return sa.ok - sb.ok;
+    return Math.random() - 0.5;
+  });
   return q.slice(0, ROUND_LEN);
 }
 
@@ -84,6 +132,7 @@ function renderHome() {
   const a = progress("all");
   const wrongWords = WORDS.filter((w) => wordStats(w).wrong > 0);
   const sm = WORDS.filter((w) => w.sample).length;
+  const pri = poolOf(tab).filter((w) => w.priority).length;
 
   $("#app").innerHTML = `
     <div class="card">
@@ -98,6 +147,7 @@ function renderHome() {
         <span class="chip wip">✍️ 練習中 ${a.wip}</span>
         <span class="chip no">📄 未學 ${a.no}</span>
         <span class="chip">❌ 錯過 ${a.wrong}</span>
+        ${pri ? `<span class="chip" style="background:#fff8e1;color:#b45309">⭐ 相片重點 ${pri}</span>` : ""}
         ${sm ? `<span class="chip sm">試 ${sm}（sample）</span>` : ""}
       </div>
     </div>
@@ -112,7 +162,8 @@ function renderHome() {
         <button class="btn b" id="wrongBtn" ${cur ? "" : "disabled style='opacity:.4'"}">🔁 錯字重溫（${cur}）</button>
         <button class="btn gray" id="listBtn">📋 字庫</button>
       </div>
-      <p class="hint">💡 練緊邊科？撳上面 tab 揀；「全部」就兩科一齊練。</p>
+      <button class="btn ${voiceAuto() ? "b" : "gray"} big" id="voiceBtn" style="margin-top:8px">🔊 自動讀音：${voiceAuto() ? "開（每題自動讀）" : "關"}</button>
+      <p class="hint">💡 出題順序：⭐ 相片重點字 → 錯過嘅字 → 其他未學/未熟 → 已熟。揀科撳上面 tab。</p>
     </div>`;
 
   $("#app").querySelectorAll(".tab").forEach((b) => b.onclick = () => { tab = b.dataset.t || b.dataset.s; render(); });
@@ -120,6 +171,8 @@ function renderHome() {
   $("#startBtn").onclick = () => startRound(false);
   $("#wrongBtn").onclick = () => startRound(true);
   $("#listBtn").onclick = showList;
+  const vb = $("#voiceBtn");
+  if (vb) vb.onclick = () => { setVoiceAuto(!voiceAuto()); render(); };
 }
 
 function startRound(onlyWrong) {
@@ -142,11 +195,17 @@ function renderQ() {
         <div class="typebox"><input id="typeIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="打英文…"></div>`
       : `<div class="qtext">${w.en}</div>
         <div id="opts"></div>`}
+      <div style="text-align:center;margin:2px 0 10px"><button class="spk" id="spkBtn">🔊 讀音</button></div>
       <div class="feedback" id="fb"></div>
       <div id="nextArea"></div>
     </div>`;
   $("#headStreak").textContent = "🔥 " + round.consec;
   $("#headScore").textContent = "🏆 " + round.score;
+  const spk = $("#spkBtn");
+  if (spk) {
+    spk.onclick = () => speakWord(w);
+    if (voiceAuto()) setTimeout(() => { if (document.querySelector("#spkBtn")) speakWord(w); }, 500);
+  }
   if (isType) {
     const inp = $("#typeIn");
     const submit = () => answerType(inp.value, w);
@@ -281,24 +340,32 @@ function renderSummary() {
 /* ---------- 字庫一覽 ---------- */
 function showList() {
   const words = poolOf(tab);
-  const rows = words.map((w) => {
+  const SHOW_MAX = 2000;
+  const rows = words.slice(0, SHOW_MAX).map((w) => {
     const s = wordStats(w);
     const dot = master(s) ? "ok" : seen(s) ? "wip" : "no";
-    return `<div class="wli"><span><span class="dot ${dot}"></span><span class="zh">${w.zh}</span> ${w.sample ? '<span class="chip sm">試</span>' : ""}</span>
+    return `<div class="wli"><span><span class="dot ${dot}"></span>${w.priority ? "⭐ " : ""}<span class="zh">${w.zh}</span> ${w.sample ? '<span class="chip sm">試</span>' : ""}</span>
       <span class="en">${w.en} · 錯${s.wrong}·啱${s.ok}</span></div>`;
   }).join("");
+  const moreNote = words.length > SHOW_MAX
+    ? `<p class="note">顯示頭 ${SHOW_MAX} 個（共 ${words.length}）— 撳上方科目 tab 可以收窄</p>` : "";
   const d = el(`<div class="modal"><div class="box">
+    <button class="close-x" id="closeX">✕</button>
     <div class="tabs" style="margin-bottom:6px">
       <button class="tab ${tab === "all" ? "active" : ""}" data-t="all">全部</button>
       <button class="tab ${tab === "Biology" ? "active" : ""}" data-s="Biology">🧬 生物</button>
       <button class="tab ${tab === "Chemistry" ? "active" : ""}" data-s="Chemistry">🧪 化學</button>
     </div>
     <h3>字庫（${words.length} 字）— 🟢已熟 🟡練習中 ⚪未學</h3>
+    ${moreNote}
     ${rows || "<p>未有字</p>"}
-    <button class="btn g big" id="closeList" style="margin-top:12px">關閉</button>
+    <div class="modal-foot"><button class="btn g big" id="closeList">🏠 返回主頁</button></div>
   </div></div>`);
+  const close = () => d.remove();
   d.querySelectorAll(".tab").forEach((b) => b.onclick = () => { tab = b.dataset.t || b.dataset.s; d.remove(); showList(); });
-  d.querySelector("#closeList").onclick = () => d.remove();
+  d.querySelector("#closeList").onclick = close;
+  d.querySelector("#closeX").onclick = close;
+  d.onclick = (e) => { if (e.target === d) close(); };   // 撳外面黑色位都關
   document.body.appendChild(d);
 }
 
