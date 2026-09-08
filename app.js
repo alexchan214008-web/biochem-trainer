@@ -128,12 +128,12 @@ function renderHome() {
     </div>
     <div class="card">
       <div class="modes">
-        <button class="mode ${mode === "mc" ? "active" : ""}" data-m="mc"><span class="t">👀 認字</span><span class="s">睇英文撳中文</span></button>
-        <button class="mode ${mode === "type" ? "active" : ""}" data-m="type"><span class="t">⌨️ 串字</span><span class="s">睇中文打英文</span></button>
-        <button class="mode ${mode === "mixed" ? "active" : ""}" data-m="mixed"><span class="t">🔀 混合</span><span class="s">兩種輪流</span></button>
+        <button class="mode ${mode === "mc" ? "active" : ""}" data-m="mc"><span class="t"><img class="bic" src="icons/btn_mc.png" alt="">認字</span><span class="s">睇英文撳中文</span></button>
+        <button class="mode ${mode === "type" ? "active" : ""}" data-m="type"><span class="t"><img class="bic" src="icons/btn_type.png" alt="">串字</span><span class="s">睇中文打英文</span></button>
+        <button class="mode ${mode === "mixed" ? "active" : ""}" data-m="mixed"><span class="t"><img class="bic" src="icons/btn_mixed.png" alt="">混合</span><span class="s">兩種輪流</span></button>
       </div>
       ${chapRow}
-      <button class="btn g big" id="startBtn">▶️ 開始練習（每組 ${ROUND_LEN} 題）</button>
+      <button class="btn g big" id="startBtn"><img class="bic" src="icons/btn_start.png" alt="">開始練習（每組 ${ROUND_LEN} 題）</button>
       <div class="row" style="margin-top:10px">
         <button class="btn b" id="cardBtn">📇 溫習卡</button>
         <button class="btn b" id="wrongBtn" ${cur ? "" : "disabled style='opacity:.4'"}>🔁 錯字重溫（${cur}）</button>
