@@ -137,3 +137,7 @@ footer{text-align:center; font-size:11px; color:#aaa; padding:10px; margin-top:2
   box-shadow:0 1px 4px rgba(0,0,0,.28);display:inline-block;background:#fff}
 .mode .bic{width:26px;height:26px;vertical-align:-6px}
 .btn.big .bic{width:28px;height:28px;vertical-align:-7px}
+
+.tab[data-s="space"]{border-left:6px solid #7e57c2}
+.tab.active[data-s="space"]{background:#7e57c2; border-color:#7e57c2}
+.bar.space i{background:#7e57c2}

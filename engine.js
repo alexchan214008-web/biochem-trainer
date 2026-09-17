@@ -22,6 +22,25 @@
     "恆定性", "神經協調與感官", "激素協調", "生殖與生長", "遺傳",
     "微生物學", "生物科技", "疾病與免疫", "進化與分類", "生態學",
   ];
+  /* 每個 subject 嘅章節順序（冇列到 ＝ 呢科冇章節，UI 唔會顯示揀章節） */
+  const CHAPTERS_BY_SUBJECT = {
+    Biology: CHAPTER_ORDER,
+    Chemistry: [
+      "原子結構", "化學鍵", "週期性", "化學反應", "摩爾概念",
+      "化學能量學", "化學平衡", "酸鹼平衡",
+      "有機化學", "異構", "有機反應",
+    ],
+    space: [
+      "4124 原子結構", "4124 化學鍵", "4124 週期性", "4124 化學反應", "4124 摩爾概念",
+      "4124 化學能量學", "4124 化學平衡", "4124 酸鹼平衡", "4124 有機化學", "4124 異構", "4124 有機反應",
+      "4010 食物成分－碳水", "4010 食物成分－蛋白質", "4010 食物成分－脂質",
+      "4010 維生素與礦物質", "4010 消化與代謝", "4010 食品加工",
+      "4001 描述統計", "4001 概率", "4001 概率分佈", "4001 抽樣與估計", "4001 假設檢定",
+      "4003 學術寫作",
+      "4200 批判思考", "4200 科學與倫理",
+    ],
+  };
+  function chaptersOf(subj) { return CHAPTERS_BY_SUBJECT[subj] || null; }
 
   /* ---------- 資料 key ---------- */
   function key(w) { return w.subject + "|" + w.en; }
@@ -51,7 +70,8 @@
 
   /* ---------- 篩選 helpers ---------- */
   function poolOf(words, subj) {
-    return words.filter((w) => subj === "all" || w.subject === subj);
+    /* mergedInto：已合併嘅條目保留喺資料檔（唔刪），但唔會出練習／字庫 */
+    return words.filter((w) => (subj === "all" || w.subject === subj) && !w.mergedInto);
   }
   /* 當前出題池：跟 subj + chapter（章節淨係 Biology 概念） */
   function activePool(words, subj, chapter) {
@@ -72,9 +92,9 @@
     }
     return r;
   }
-  /* 單一章節嘅字同進度（Biology 範圍） */
-  function chapterMeta(words, stats, name) {
-    const list = poolOf(words, "Biology").filter((w) => w.chapter === name);
+  /* 單一章節嘅字同進度（預設 Biology，可指定 subject） */
+  function chapterMeta(words, stats, name, subj) {
+    const list = poolOf(words, subj || "Biology").filter((w) => w.chapter === name);
     let ok = 0;
     for (const w of list) if (master(stats[key(w)] || emptyStats())) ok++;
     return { total: list.length, ok };
@@ -91,7 +111,7 @@
   function tierOf(w, stats) {
     const s = stats[key(w)] || emptyStats();
     const p = w.priority || 0;
-    if (p > 0 && !master(s)) return 0;
+    if (p === 1 && !master(s)) return 0;   // 只有 priority 1 入 tier 0（⭐）
     if (s.wrong > 0 && !master(s)) return 1;
     if (!seen(s)) return 2;
     if (s.ok > 0) return 3;
@@ -104,8 +124,8 @@
     const q = [...p].sort((a, b) => {
       const ta = tierOf(a, stats), tb = tierOf(b, stats);
       if (ta !== tb) return ta - tb;
-      const pa = a.priority || 0, pb = b.priority || 0;
-      if (pa !== pb) return pb - pa;
+      const pa = a.priority || 99, pb = b.priority || 99;
+      if (pa !== pb) return pa - pb;   // 1（最重要）排最前；冇 priority = 99 排最後
       const sa = stats[key(a)] || emptyStats(), sb = stats[key(b)] || emptyStats();
       if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
       if (sa.ok !== sb.ok) return sa.ok - sb.ok;
@@ -140,8 +160,8 @@
     const p = activePool(words, subj, chapter).slice().sort((a, b) => {
       const ta = tierOf(a, stats), tb = tierOf(b, stats);
       if (ta !== tb) return ta - tb;
-      const pa = a.priority || 0, pb = b.priority || 0;
-      if (pa !== pb) return pb - pa;
+      const pa = a.priority || 99, pb = b.priority || 99;
+      if (pa !== pb) return pa - pb;   // 1（最重要）排最前；冇 priority = 99 排最後
       return Math.random() - 0.5;
     });
     const fresh = p.filter((w) => !master(stats[key(w)] || emptyStats()));
@@ -150,7 +170,7 @@
   }
 
   const API = {
-    LS, ROUND_LEN, CARD_LEN, CHAPTER_ORDER,
+    LS, ROUND_LEN, CARD_LEN, CHAPTER_ORDER, CHAPTERS_BY_SUBJECT, chaptersOf,
     key, emptyStats, loadStats, saveStats, normalizeStats,
     seen, master, poolOf, activePool, progress, chapterMeta,
     tierOf, buildQueue, normTerm, acceptForms, buildCardQueue,

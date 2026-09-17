@@ -6,10 +6,17 @@ if (!E) throw new Error("engine.js 未載入 — index.html 要 <script src='eng
 const VOICE_KEY = "biochem_voice";
 const SUBJ_ZH = { Biology: "生物 Biology", Chemistry: "化學 Chemistry" };
 const SUBJ_ID = { Biology: "bio", Chemistry: "chem" };
+/* 科目註冊表 —— 加新科：喺下面 SUBJ_ID / SUBJ_ZH / SUBJ_EMOJI 各加一項就得 */
+SUBJ_ID["space"] = "space";
+SUBJ_ZH["space"] = "space";
+const SUBJ_EMOJI = { Biology: "\u{1F9EC}", Chemistry: "\u{1F9EA}", "space": "\u{1F4DA}" };
+const SUBJ_KEYS = Object.keys(SUBJ_ZH);
+const SUBJ_TAB = Object.fromEntries(SUBJ_KEYS.map((k) => [k, (SUBJ_EMOJI[k] || "") + " " + String(SUBJ_ZH[k]).split(" ")[0]]));
 /* engine 常數/熟練度 alias（單一來源喺 engine.js） */
 const ROUND_LEN = E.ROUND_LEN;
 const CARD_LEN = E.CARD_LEN;
 const CHAPTER_ORDER = E.CHAPTER_ORDER;
+const chaptersOf = (subj) => E.chaptersOf(subj);
 const master = (s) => E.master(s);
 const seen = (s) => E.seen(s);
 
@@ -37,7 +44,7 @@ function save() { E.saveStats(STATS); }
 function wordStats(w) { return STATS[E.key(w)]; }
 function poolOf(subj) { return E.poolOf(WORDS, subj); }
 function activePool() { return E.activePool(WORDS, tab, chapter); }
-function chapterMeta(name) { return E.chapterMeta(WORDS, STATS, name); }
+function chapterMeta(name) { return E.chapterMeta(WORDS, STATS, name, tab); }
 function progress(subj) { return E.progress(WORDS, STATS, subj); }
 function tierOf(w) { return E.tierOf(w, STATS); }
 function buildQueue(subj, onlyWrong) { return E.buildQueue(WORDS, STATS, subj, chapter, onlyWrong); }
@@ -77,12 +84,14 @@ function render() {
   renderHome();
 }
 function el(html) { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; }
-/* 科目 tab（全部/生物/化學）—— renderHome / showList / showChapterPicker 共用 */
+/* 科目 tab 由註冊表生成 —— renderHome / showList / showChapterPicker 共用 */
+function subjectTabsHTML() {
+  return SUBJ_KEYS.map((k) => `<button class="tab ${tab === k ? "active" : ""}" data-s="${k}">${SUBJ_TAB[k]}</button>`).join("");
+}
 function tabsHTML(extraStyle) {
   return `<div class="tabs"${extraStyle ? ` style="${extraStyle}"` : ""}>
       <button class="tab ${tab === "all" ? "active" : ""}" data-t="all">全部</button>
-      <button class="tab ${tab === "Biology" ? "active" : ""}" data-s="Biology">🧬 生物</button>
-      <button class="tab ${tab === "Chemistry" ? "active" : ""}" data-s="Chemistry">🧪 化學</button>
+      ${subjectTabsHTML()}
     </div>`;
 }
 /* 揀科：轉 tab 一律清除章節 filter（章節淨係 Biology 概念） */
@@ -93,7 +102,7 @@ function renderHome() {
   const bars = Object.keys(SUBJ_ZH).map((sj) => {
     const p = progress(sj);
     const pct = p.total ? Math.round((p.ok / p.total) * 100) : 0;
-    const label = sj === "Biology" ? "🧬" : "🧪";
+    const label = SUBJ_EMOJI[sj] || "\u{1F4D8}";
     return `<div class="prog">
       <div class="lbl"><span>${label} ${SUBJ_ZH[sj]}</span><span>已熟 ${p.ok}/${p.total}（${pct}%）</span></div>
       <div class="bar ${SUBJ_ID[sj]}"><i style="width:${pct}%"></i></div></div>`;
@@ -102,14 +111,15 @@ function renderHome() {
   const wrongWords = WORDS.filter((w) => wordStats(w).wrong > 0);
   const sm = WORDS.filter((w) => w.sample).length;
   const pri = poolOf(tab).filter((w) => w.priority).length;
-  const isBio = tab === "Biology";
-  const chapMeta = (isBio && chapter) ? chapterMeta(chapter) : null;
-  const chapRow = isBio ? `
+  const chapList = chaptersOf(tab);
+  const hasChap = !!chapList;
+  const chapMeta = (hasChap && chapter) ? chapterMeta(chapter) : null;
+  const chapRow = hasChap ? `
       <div class="chapbar">
         ${chapMeta
           ? `<span class="chapcur">📚 章節：<b>${chapter}</b>（${chapMeta.total} 字 · 已熟 ${chapMeta.ok}）</span>
            <button class="btn gray sm-btn" id="chapClearBtn">✕ 全部課題</button>`
-          : `<span class="chapcur">📚 全部課題（20 課）</span>`}
+          : `<span class="chapcur">📚 全部課題（${chapList.length} 課）</span>`}
         <button class="btn ${chapter ? "b" : "gray"} sm-btn" id="chapBtn">${chapter ? "換章節" : "揀章節"}</button>
       </div>` : "";
 
@@ -142,7 +152,7 @@ function renderHome() {
         <button class="btn gray" id="listBtn">📋 字庫</button>
       </div>
       <button class="btn ${voiceAuto() ? "b" : "gray"} big" id="voiceBtn" style="margin-top:8px">🔊 自動讀音：${voiceAuto() ? "開（每題自動讀）" : "關"}</button>
-      <p class="hint">💡 順序：📇 溫習卡學字 → ▶️ 練習鞏固 → 錯字自動重溫。生物科可以揀章節集中練。</p>
+      <p class="hint">💡 順序：📇 溫習卡學字 → ▶️ 練習鞏固 → 錯字自動重溫。有章節嘅科目可以揀章節集中練。</p>
     </div>`;
 
   $("#app").querySelectorAll(".tab").forEach((b) => b.onclick = () => { pickTab(b); render(); });
@@ -172,8 +182,8 @@ function startCards() {
   const p = activePool().slice().sort((a, b) => {
     const ta = tierOf(a), tb = tierOf(b);
     if (ta !== tb) return ta - tb;
-    const pa = a.priority || 0, pb = b.priority || 0;
-    if (pa !== pb) return pb - pa;
+    const pa = a.priority || 99, pb = b.priority || 99;
+    if (pa !== pb) return pa - pb;   // 1（最重要）排最前；冇 priority = 99 排最後
     return Math.random() - 0.5;
   });
   const fresh = p.filter((w) => !master(wordStats(w)));
@@ -186,7 +196,7 @@ function renderCard() {
   const w = card.queue[card.idx];
   card.flipped = false;
   const chapTag = w.chapter ? ` · 📚 ${w.chapter}` : "";
-  const tagTxt = `${card.idx + 1}/${card.queue.length} · ${w.subject === "Biology" ? "🧬 生物" : "🧪 化學"}${chapTag} · 📇 溫習`;
+  const tagTxt = `${card.idx + 1}/${card.queue.length} · ${SUBJ_TAB[w.subject] || w.subject}${chapTag} · 📇 溫習`;
   const star = w.priority ? "⭐ " : "";
   const status = master(wordStats(w)) ? "（已熟·複習）" : seen(wordStats(w)) ? "（練習中）" : "（未學）";
   $("#app").innerHTML = `
@@ -279,7 +289,7 @@ function renderQ() {
   round.answered = false;
   const isType = round.modeNow = (mode === "type") || (mode === "mixed" && round.idx % 2 === 1);
   const chapTag = w.chapter ? ` · 📚 ${w.chapter}` : "";
-  const tagTxt = `${round.idx + 1}/${round.queue.length} · ${w.subject === "Biology" ? "🧬 生物" : "🧪 化學"}${chapTag} · ${isType ? "⌨️ 串字" : "👀 認字"}`;
+  const tagTxt = `${round.idx + 1}/${round.queue.length} · ${SUBJ_TAB[w.subject] || w.subject}${chapTag} · ${isType ? "⌨️ 串字" : "👀 認字"}`;
   $("#app").innerHTML = `
     <div class="card">
       <div class="qtag"><span>${tagTxt}</span><span>🔥 ${round.consec} · 🏆 ${round.score}</span></div>
@@ -446,7 +456,7 @@ function showList() {
 
 /* ---------- 揀章節（Biology 限定） ---------- */
 function showChapterPicker() {
-  const rows = CHAPTER_ORDER.map((name) => {
+  const rows = (chaptersOf(tab) || []).map((name) => {
     const m = chapterMeta(name);
     const pct = m.total ? Math.round((m.ok / m.total) * 100) : 0;
     const active = chapter === name ? "active" : "";
@@ -458,11 +468,11 @@ function showChapterPicker() {
   }).join("");
   const d = el(`<div class="modal"><div class="box">
     <button class="close-x" id="closeX">✕</button>
-    <h3>📚 揀章節 — 生物 Biology</h3>
+    <h3>📚 揀章節 — ${SUBJ_ZH[tab] || tab}</h3>
     <p class="hint" style="margin:-4px 0 10px">揀咗之後只會出嗰課嘅字（⭐ 重點字照樣優先）；再撳一次同一個章節 = 取消。</p>
     <div class="chapgrid">
       <button class="chap all ${!chapter ? "active" : ""}" data-c="">
-        <span class="cn">🌐 全部課題</span><span class="cs">已熟 ${progress("Biology").ok}/${poolOf("Biology").length}</span>
+        <span class="cn">🌐 全部課題</span><span class="cs">已熟 ${progress(tab).ok}/${poolOf(tab).length}</span>
       </button>
       ${rows}
     </div>
