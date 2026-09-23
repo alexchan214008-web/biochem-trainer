@@ -32,7 +32,7 @@ main{max-width:560px; margin:0 auto; padding:14px 12px}
 .prog .lbl{display:flex; justify-content:space-between; font-size:13px; font-weight:700; margin-bottom:4px}
 .bar{height:12px; background:#e9e9e9; border-radius:999px; overflow:hidden}
 .bar i{display:block; height:100%; border-radius:999px; background:var(--green); transition:width .4s}
-.bar.bio i{background:#7cb342}.bar.chem i{background:#ff9800}
+.bar.bio i{background:#7cb342}.bar.chem i{background:#ff9800}.bar.awl i{background:#8e24aa}
 .chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
 .chip{font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#f0f0f0; color:#666}
 .chip.ok{background:#e8f5e9; color:#2e7d32}

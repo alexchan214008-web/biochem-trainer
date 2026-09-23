@@ -39,6 +39,9 @@
       "4003 學術寫作",
       "4200 批判思考", "4200 科學與倫理",
     ],
+    AWL: [
+      "Sublist 1",
+    ],
   };
   function chaptersOf(subj) { return CHAPTERS_BY_SUBJECT[subj] || null; }
 

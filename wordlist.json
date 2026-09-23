@@ -70186,5 +70186,992 @@
   "priority": 3,
   "chapter": "生命特徵與科學方法",
   "sample": false
+ },
+ {
+  "en": "analysis",
+  "zh": "分析（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "analyse",
+  "zh": "分析",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "analytical",
+  "zh": "分析的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "analytically",
+  "zh": "分析上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "approach",
+  "zh": "方法；接近",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "approachable",
+  "zh": "平易近人的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "area",
+  "zh": "領域；面積",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "assessment",
+  "zh": "評估（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "assess",
+  "zh": "評估",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "assessable",
+  "zh": "可評估的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "assumption",
+  "zh": "假設（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "assume",
+  "zh": "假設；認為",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "authority",
+  "zh": "權威；當局",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "authoritative",
+  "zh": "權威性的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "availability",
+  "zh": "可用性",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "available",
+  "zh": "可用的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "benefit",
+  "zh": "好處；得益",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "beneficial",
+  "zh": "有益的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "concept",
+  "zh": "概念",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "conceptualise",
+  "zh": "概念化（動）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "conceptual",
+  "zh": "概念上的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "conceptually",
+  "zh": "概念上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "consistency",
+  "zh": "一致性",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "consist",
+  "zh": "由…組成",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "consistent",
+  "zh": "一致的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "consistently",
+  "zh": "一貫地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "constitution",
+  "zh": "憲法；構成",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "constitute",
+  "zh": "構成",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "constitutional",
+  "zh": "憲法的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "constitutionally",
+  "zh": "憲法上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "context",
+  "zh": "背景；語境",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "contextualise",
+  "zh": "情境化",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "contextual",
+  "zh": "語境上的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "contract",
+  "zh": "合約；收縮",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "creation",
+  "zh": "創造（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "create",
+  "zh": "創造",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "creative",
+  "zh": "有創意的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "creatively",
+  "zh": "有創意地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "data",
+  "zh": "數據",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "definition",
+  "zh": "定義（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "define",
+  "zh": "定義",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "definable",
+  "zh": "可定義的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "derivation",
+  "zh": "推導；由來",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "derive",
+  "zh": "源自；得出",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "derivative",
+  "zh": "衍生詞；導數",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "distribution",
+  "zh": "分配（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "distribute",
+  "zh": "分配；分佈",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "distributive",
+  "zh": "分配性的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "economy",
+  "zh": "經濟",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "economic",
+  "zh": "經濟的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "economically",
+  "zh": "經濟上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "environment",
+  "zh": "環境",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "environmental",
+  "zh": "環境的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "environmentally",
+  "zh": "環境上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "establishment",
+  "zh": "機構；建立",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "establish",
+  "zh": "建立；確立",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "estimate",
+  "zh": "估計",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "evidence",
+  "zh": "證據；證明",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "evident",
+  "zh": "明顯的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "evidently",
+  "zh": "明顯地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "export",
+  "zh": "出口",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "factor",
+  "zh": "因素",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "finance",
+  "zh": "財政；金融",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "financial",
+  "zh": "財務的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "financially",
+  "zh": "財政上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "formula",
+  "zh": "公式",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "formulate",
+  "zh": "制訂",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "function",
+  "zh": "功能；函數",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "functional",
+  "zh": "功能的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "functionally",
+  "zh": "功能上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "identification",
+  "zh": "識別（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "identify",
+  "zh": "識別；確認",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "identifiable",
+  "zh": "可識別的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "income",
+  "zh": "收入",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "indication",
+  "zh": "跡象；指示",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "indicate",
+  "zh": "顯示；指出",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "indicative",
+  "zh": "指示性的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "individual",
+  "zh": "個人；個別的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "individually",
+  "zh": "個別地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "interpretation",
+  "zh": "詮釋（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "interpret",
+  "zh": "詮釋；解讀",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "interpretative",
+  "zh": "詮釋性的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "involvement",
+  "zh": "參與；涉及",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "involve",
+  "zh": "涉及",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "involved",
+  "zh": "涉及了；相關的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "issue",
+  "zh": "議題；發行",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "labour",
+  "zh": "勞工；勞動",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "legality",
+  "zh": "合法性",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "legal",
+  "zh": "法律的；合法的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "legally",
+  "zh": "法律上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "legislation",
+  "zh": "法例",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "legislate",
+  "zh": "立法",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "legislative",
+  "zh": "立法的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "majority",
+  "zh": "大多數",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "major",
+  "zh": "主要的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "method",
+  "zh": "方法",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "methodical",
+  "zh": "有條理的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "occurrence",
+  "zh": "發生（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "occur",
+  "zh": "發生",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "percentage",
+  "zh": "百分比（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "period",
+  "zh": "時期",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "periodic",
+  "zh": "週期性的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "periodically",
+  "zh": "定期地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "policy",
+  "zh": "政策",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "principle",
+  "zh": "原則",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "principled",
+  "zh": "有原則的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "procedure",
+  "zh": "程序",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "proceed",
+  "zh": "進行；著手",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "procedural",
+  "zh": "程序上的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "process",
+  "zh": "過程；處理",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "requirement",
+  "zh": "要求（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "require",
+  "zh": "需要；要求",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "required",
+  "zh": "需要了；必須的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "research",
+  "zh": "研究",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "response",
+  "zh": "回應（名詞）",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "respond",
+  "zh": "回應",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "responsive",
+  "zh": "反應迅速的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "role",
+  "zh": "角色",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "section",
+  "zh": "部分；章節",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "sector",
+  "zh": "界別；部門",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "significance",
+  "zh": "重要性；顯著性",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "signify",
+  "zh": "表示；意味",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "significant",
+  "zh": "顯著的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "significantly",
+  "zh": "顯著地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "similarity",
+  "zh": "相似之處",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "similar",
+  "zh": "相似的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "similarly",
+  "zh": "同樣地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "source",
+  "zh": "來源",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "specification",
+  "zh": "規格；明確說明",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "specific",
+  "zh": "具體的；特定的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "specifically",
+  "zh": "具體地；特別地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "structure",
+  "zh": "結構",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "structural",
+  "zh": "結構上的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "structurally",
+  "zh": "結構上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "theory",
+  "zh": "理論",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "theoretical",
+  "zh": "理論上的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "theoretically",
+  "zh": "理論上",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "variability",
+  "zh": "變異性",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "vary",
+  "zh": "變化；不同",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "variable",
+  "zh": "變數；可變的",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
+ },
+ {
+  "en": "invariably",
+  "zh": "總是；不變地",
+  "subject": "AWL",
+  "chapter": "Sublist 1",
+  "sample": false
  }
 ]

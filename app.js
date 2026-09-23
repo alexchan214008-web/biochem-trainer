@@ -9,7 +9,10 @@ const SUBJ_ID = { Biology: "bio", Chemistry: "chem" };
 /* 科目註冊表 —— 加新科：喺下面 SUBJ_ID / SUBJ_ZH / SUBJ_EMOJI 各加一項就得 */
 SUBJ_ID["space"] = "space";
 SUBJ_ZH["space"] = "space";
+SUBJ_ID["AWL"] = "awl";
+SUBJ_ZH["AWL"] = "學術詞彙 AWL";
 const SUBJ_EMOJI = { Biology: "\u{1F9EC}", Chemistry: "\u{1F9EA}", "space": "\u{1F4DA}" };
+SUBJ_EMOJI["AWL"] = "\u{1F4D8}";
 const SUBJ_KEYS = Object.keys(SUBJ_ZH);
 const SUBJ_TAB = Object.fromEntries(SUBJ_KEYS.map((k) => [k, (SUBJ_EMOJI[k] || "") + " " + String(SUBJ_ZH[k]).split(" ")[0]]));
 /* engine 常數/熟練度 alias（單一來源喺 engine.js） */
